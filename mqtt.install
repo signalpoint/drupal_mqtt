@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function mqtt_uninstall() {
+  $vars = array(
+    'mqtt_client_id',
+    'mqtt_user_name',
+    'mqtt_user_pass',
+    'mqtt_host',
+    'mqtt_port'
+  );
+  foreach($vars as $var) { variable_del($var); }
+}
