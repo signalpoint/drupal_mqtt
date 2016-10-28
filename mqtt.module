@@ -15,12 +15,10 @@ function mqtt_menu() {
   return $items;
 }
 
-
 /**
  * Basic settings form.
  */
-function mqtt_settings_form() {
-  $form = array();
+function mqtt_settings_form($form, &$form_state) {
 
   $form['mqtt_host'] = array(
     '#type' => 'textfield',
@@ -34,10 +32,22 @@ function mqtt_settings_form() {
     '#default_value' => variable_get('mqtt_port', '1883')
   );
 
-  $form['mqtt_client_name'] = array(
+  $form['mqtt_client_id'] = array(
     '#type' => 'textfield',
     '#title' => t('MQTT client name'),
-    '#default_value' => variable_get('mqtt_client_name', 'Drupal MQTT client name')
+    '#default_value' => variable_get('mqtt_client_id', 'Drupal MQTT client id')
+  );
+
+  $form['mqtt_user_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('MQTT user name'),
+    '#default_value' => mqtt_user_name()
+  );
+
+  $form['mqtt_user_pass'] = array(
+    '#type' => 'textfield',
+    '#title' => t('MQTT user pass'),
+    '#default_value' => mqtt_password()
   );
 
   return system_settings_form($form);
@@ -45,7 +55,7 @@ function mqtt_settings_form() {
 
 
 /**
- * Rules intgration.
+ * Rules integration.
  */
 function mqtt_rules_event_info() {
   $items = array(
@@ -62,4 +72,35 @@ function mqtt_rules_event_info() {
   );
 
   return $items;
+}
+
+/**
+ * @return null|String
+ */
+function mqtt_user_name() {
+  $pass = variable_get('mqtt_user_name', '');
+  return $pass == '' ? NULL : $pass;
+}
+
+/**
+ * @return null|String
+ */
+function mqtt_password() {
+  $pass = variable_get('mqtt_user_pass', '');
+  return $pass == '' ? NULL : $pass;
+}
+
+/**
+ * Instantiate and returns a new phpMQTT object.
+ * @return \phpMQTT
+ */
+function mqtt_instantiate() {
+  include_once(drupal_get_path('module', 'mqtt') . '/phpMQTT/phpMQTT.php');
+  $mqtt = new phpMQTT(
+    variable_get('mqtt_host', 'test.mosquitto.org'),
+    variable_get('mqtt_port', '1883'),
+    variable_get('mqtt_client_id', 'Drupal MQTT client id')
+  );
+  $mqtt->debug = TRUE;
+  return $mqtt;
 }
